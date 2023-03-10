@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { UserContext } from "../context/UserProvider";
 import Swal from "sweetalert2";
 import { Navigate } from "react-router-dom";
-// import axios from "axios";
+import { login } from "../functions/auth";
 
 const Login = () => {
     const [_usuario, setUsuario] = useState("");
@@ -13,35 +13,45 @@ const Login = () => {
         return <Navigate to="/" />;
     }
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-        let request = {
-            username: _usuario,
-            password: _clave,
-        };
+        const userLogin = await login(_usuario, _clave);
+        if (userLogin.error) {
+            if (userLogin.error.response) {
+                Swal.fire("Opps!", userLogin.error.response.data.message, "error");
+                return;
+            }
+            Swal.fire("Opps!", userLogin.error.message, "error");
+            return;
+        }
+        iniciarSession(userLogin.data);
 
-        fetch("http://localhost:3000/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json;charset=utf-8",
-            },
-            body: JSON.stringify(request),
-        })
-            .then((response) => {
-                return response.ok ? response.json() : Promise.reject(response);
-            })
-            .then((dataJson) => {
-                if (dataJson.error === true) {
-                    Swal.fire("Opps!", "No se encontro el usuario", "error");
-                } else {
-                    iniciarSession(dataJson);
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-                Swal.fire("Opps!", "No se pudo iniciar sessión", "error");
-            });
+        // let request = {
+        //     username: _usuario,
+        //     password: _clave,
+        // };
+
+        // fetch("api/session/Login", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json;charset=utf-8",
+        //     },
+        //     body: JSON.stringify(request),
+        // })
+        //     .then((response) => {
+        //         return response.ok ? response.json() : Promise.reject(response);
+        //     })
+        //     .then((dataJson) => {
+        //         if (dataJson.idUsuario == 0) {
+        //             Swal.fire("Opps!", "No se encontro el usuario", "error");
+        //         } else {
+        //             iniciarSession(dataJson);
+        //         }
+        //     })
+        //     .catch((error) => {
+        //         Swal.fire("Opps!", "No se pudo iniciar sessión", "error");
+        //     });
     };
 
     return (

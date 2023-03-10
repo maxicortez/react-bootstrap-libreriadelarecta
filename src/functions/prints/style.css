@@ -1,0 +1,10 @@
+
+.licencia {
+    display: none;
+}
+
+@media print{
+    .licencia {
+      display: block;
+    }
+}

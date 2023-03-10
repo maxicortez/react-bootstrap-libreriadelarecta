@@ -1,4 +1,4 @@
-﻿import React, { useContext } from "react";
+import React, { useContext } from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -20,6 +20,7 @@ const NavBar = () => {
     useEffect(() => {
         let dt = JSON.parse(user);
         setDataUser(dt);
+        console.log(dt);
     }, []);
     return (
         <ul className="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
