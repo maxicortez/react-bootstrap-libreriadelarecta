@@ -1,7 +1,9 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody, Label, Input, FormGroup, ModalFooter } from "reactstrap";
 import Swal from "sweetalert2";
+
+import { findCategorias, createCategoria, updateCategoria, deleteCategoria } from "../functions/categorias";
 
 const modeloCategoria = {
     idCategoria: 0,
@@ -16,7 +18,7 @@ const Categoria = () => {
     const [verModal, setVerModal] = useState(false);
 
     const handleChange = (e) => {
-        let value = e.target.nodeName === "SELECT" ? (e.target.value == "true" ? true : false) : e.target.value;
+        let value = e.target.nodeName === "SELECT" ? (e.target.value === "true" ? true : false) : e.target.value;
 
         setCategoria({
             ...categoria,
@@ -25,10 +27,8 @@ const Categoria = () => {
     };
 
     const obtenerCategorias = async () => {
-        let response = await fetch("api/categoria/Lista");
-
-        if (response.ok) {
-            let data = await response.json();
+        const data = await findCategorias();
+        if (data) {
             setCategorias(data);
             setPendiente(false);
         }
@@ -103,35 +103,23 @@ const Categoria = () => {
 
     const guardarCambios = async () => {
         let response;
-        if (categoria.idCategoria == 0) {
-            response = await fetch("api/categoria/Guardar", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json;charset=utf-8",
-                },
-                body: JSON.stringify(categoria),
-            });
+        console.log(categoria);
+        if (categoria.idCategoria === 0) {
+            response = await createCategoria(categoria.descripcion, categoria.esActivo);
         } else {
-            response = await fetch("api/categoria/Editar", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json;charset=utf-8",
-                },
-                body: JSON.stringify(categoria),
-            });
+            response = await updateCategoria(categoria.idCategoria, categoria.descripcion, categoria.esActivo);
         }
-
-        if (response.ok) {
+        if (response.idCategoria) {
             await obtenerCategorias();
             setCategoria(modeloCategoria);
             setVerModal(!verModal);
         } else {
-            alert("error al guardar");
+            alert("Error al guardar cambios");
         }
     };
 
     const eliminarCategoria = async (id) => {
-        Swal.fire({
+        const result = await Swal.fire({
             title: "Esta seguro?",
             text: "Desesa eliminar esta categoria",
             icon: "warning",
@@ -140,17 +128,15 @@ const Categoria = () => {
             cancelButtonColor: "#d33",
             confirmButtonText: "Si, continuar",
             cancelButtonText: "No, volver",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const response = fetch("api/categoria/Eliminar/" + id, { method: "DELETE" }).then((response) => {
-                    if (response.ok) {
-                        obtenerCategorias();
-
-                        Swal.fire("Eliminado!", "La categoria fue eliminada.", "success");
-                    }
-                });
-            }
         });
+        if (!result.isConfirmed) return;
+        const response = await deleteCategoria(id);
+        if (response.idCategoria) {
+            obtenerCategorias();
+            Swal.fire("Eliminado!", "La categoria fue eliminada.", "success");
+        } else {
+            alert("Error al eliminar");
+        }
     };
 
     return (

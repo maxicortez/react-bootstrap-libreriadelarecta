@@ -18,12 +18,3 @@ export async function findMaterialPointOfSale(idEmpresa, findQuery) {
     return error;
   }
 }
-
-export function logout() {
-  try {
-    deleteStorage("config");
-    return "ok";
-  } catch (error) {
-    return `Error: ${error}`;
-  }
-}
