@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import { Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody, Label, Input, FormGroup, ModalFooter } from "reactstrap";
+import { Card, CardBody, CardHeader, Button, Modal, ModalHeader, ModalBody, Label, Input, FormGroup, ModalFooter, Row, Col } from "reactstrap";
 import Swal from "sweetalert2";
 
-import { findCategorias, createCategoria, updateCategoria, deleteCategoria } from "../functions/categorias";
+import { findCategoriasByDescription, createCategoria, updateCategoria, deleteCategoria } from "../functions/categorias";
 
 const modeloCategoria = {
     idCategoria: 0,
@@ -16,6 +16,7 @@ const Categoria = () => {
     const [pendiente, setPendiente] = useState(true);
     const [categorias, setCategorias] = useState([]);
     const [verModal, setVerModal] = useState(false);
+    const [queryCategoria, setQueryCategoria] = useState("");
 
     const handleChange = (e) => {
         let value = e.target.nodeName === "SELECT" ? (e.target.value === "true" ? true : false) : e.target.value;
@@ -27,7 +28,7 @@ const Categoria = () => {
     };
 
     const obtenerCategorias = async () => {
-        const data = await findCategorias();
+        const data = await findCategoriasByDescription(queryCategoria);
         if (data) {
             setCategorias(data);
             setPendiente(false);
@@ -55,7 +56,7 @@ const Categoria = () => {
             },
         },
         {
-            name: "",
+            name: "Acciones",
             cell: (row) => (
                 <>
                     <Button color="primary" size="sm" className="mr-2" onClick={() => abrirEditarModal(row)}>
@@ -143,10 +144,30 @@ const Categoria = () => {
         <>
             <Card>
                 <CardHeader style={{ backgroundColor: "#4e73df", color: "white" }}>Lista de Categorias</CardHeader>
+
                 <CardBody>
-                    <Button color="success" size="sm" onClick={() => setVerModal(!verModal)}>
-                        Nueva Categoria
-                    </Button>
+                    <Row className="align-items-end">
+                        <Col sm={6}>
+                            <FormGroup>
+                                <Label>Descripcion de categoria:</Label>
+                                <Input bsSize="sm" value={queryCategoria} onChange={(e) => setQueryCategoria(e.target.value)} />
+                            </FormGroup>
+                        </Col>
+                        <Col sm={3}>
+                            <FormGroup>
+                                <Button color="primary" size="sm" block onClick={() => obtenerCategorias()}>
+                                <i className="fa fa-search" aria-hidden="true"></i> Buscar
+                                </Button>
+                            </FormGroup>
+                        </Col>
+                        <Col sm={3}>
+                            <FormGroup>
+                                <Button color="success" size="sm" block onClick={() => setVerModal(!verModal)}>
+                                    Nueva Categoria
+                                </Button>
+                            </FormGroup>
+                        </Col>
+                    </Row>
                     <hr></hr>
                     <DataTable columns={columns} data={categorias} progressPending={pendiente} pagination paginationComponentOptions={paginationComponentOptions} customStyles={customStyles} />
                 </CardBody>

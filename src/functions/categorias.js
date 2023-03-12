@@ -2,13 +2,25 @@ import axios from "axios";
 
 const url = `${process.env.REACT_APP_HOST}`;
 
-export async function findCategorias() {
+export async function findCategoriasByDescription(query) {
     try {
-        const { data } = await axios.get(`${url}/api/categorias`);
+        const { data } = await axios.post(`${url}/api/categoriasBydescription`, 
+        {
+          descripcion: query
+        });
         return data;
     } catch (error) {
         return error;
     }
+}
+
+export async function findAllCategorias() {
+  try {
+      const { data } = await axios.get(`${url}/api/categorias`);
+      return data;
+  } catch (error) {
+      return error;
+  }
 }
 
 export async function createCategoria(descripcion, esActivo) {
